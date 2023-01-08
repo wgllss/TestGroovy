@@ -1,0 +1,77 @@
+plugins {
+    id 'groovy'
+    id 'maven-publish'
+}
+//此处配置 group 和 version 可以 不用在 maven(MavenPublication) { 下面配置了,配置一个地方就好
+// 指定自定义 Gradle 插件的分组
+group 'com.wgllss.music.plugin'
+// 指定自定义 Gradle 插件的版本号
+version '1.0.01'
+
+dependencies {
+    //gradle sdk
+    implementation gradleApi()
+    //groovy sdk
+    implementation localGroovy()
+    //noinspection GradlePluginVersion
+    implementation 'com.android.tools.build:gradle:4.2.1'
+    //核心库
+    implementation 'org.ow2.asm:asm:9.3'
+    //辅助库
+    implementation 'org.ow2.asm:asm-commons:9.3'
+}
+
+// 自定义源码打包任务
+// 自定义 Jar 类型的 Gradle 任务
+// 将源码打包到 jar 包中
+task sources2Jar(type: Jar) {
+    // 指明要打的 jar 包名称
+    // 最终打包的名称是 plugin-0.1-sources.jar
+    baseName 'plugin'
+    // 指定分类器 , 与其它 jar 包进行区分
+    classifier 'sources'
+    // 设置打包哪些文件
+    // 这里设置的是 main 目录下的所有文件
+    from sourceSets.main.allSource
+}
+
+// 自定义文档打包任务
+// 自定义 Jar 类型的 Gradle 任务
+// 将文档打包到 jar 包中
+task document2Jar(type: Jar, dependsOn: [javadoc, groovydoc]) {
+    // 指明要打的 jar 包名称
+    // 最终打包的名称是 plugin-0.1-doc.jar
+    baseName 'plugin'
+    // 指定分类器 , 与其它 jar 包进行区分
+    classifier 'doc'
+    // 设置打包哪些文件
+    // 这里设置的是 javadoc 和 groovydoc 任务的输出目录
+    from javadoc.destinationDir, groovydoc.destinationDir
+}
+
+// 配置 工程工件 对应的 jar 包产出 配置
+// 这里将 文档打包 和 源码打包 后的 jar 包作为输出
+artifacts {
+    archives sources2Jar
+    archives document2Jar
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+//            groupId = 'com.wgllss.music.plugin'
+            artifactId = 'ASM'
+//            version = '1.0.00'
+
+            from components.java
+        }
+    }
+//    打包成一个jar    引用jar  生成这个三个信息
+    repositories {
+        maven {
+            url = "../repo"
+        }
+    }
+}
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
