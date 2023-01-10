@@ -7,7 +7,7 @@ plugins {
 group 'io.github.wgllss'
 //group 'com.wgllss.music.plugin'
 // 指定自定义 Gradle 插件的版本号
-version '1.0.05'
+version '1.0.10'
 
 dependencies {
     //gradle sdk
@@ -22,46 +22,11 @@ dependencies {
     implementation 'org.ow2.asm:asm-commons:9.3'
 }
 
-// 自定义源码打包任务
-// 自定义 Jar 类型的 Gradle 任务
-// 将源码打包到 jar 包中
-//task sources2Jar(type: Jar) {
-//    // 指明要打的 jar 包名称
-//    // 最终打包的名称是 plugin-0.1-sources.jar
-//    baseName 'plugin'
-//    // 指定分类器 , 与其它 jar 包进行区分
-//    classifier 'sources'
-//    // 设置打包哪些文件
-//    // 这里设置的是 main 目录下的所有文件
-//    from sourceSets.main.allSource
-//}
-
-// 自定义文档打包任务
-// 自定义 Jar 类型的 Gradle 任务
-// 将文档打包到 jar 包中
-//task document2Jar(type: Jar, dependsOn: [javadoc, groovydoc]) {
-//    // 指明要打的 jar 包名称
-//    // 最终打包的名称是 plugin-0.1-doc.jar
-//    baseName 'plugin'
-//    // 指定分类器 , 与其它 jar 包进行区分
-//    classifier 'doc'
-//    // 设置打包哪些文件
-//    // 这里设置的是 javadoc 和 groovydoc 任务的输出目录
-//    from javadoc.destinationDir, groovydoc.destinationDir
-//}
-//
-//// 配置 工程工件 对应的 jar 包产出 配置
-//// 这里将 文档打包 和 源码打包 后的 jar 包作为输出
-//artifacts {
-//    archives sources2Jar
-//    archives document2Jar
-//}
-
 publishing {
     publications {
         maven(MavenPublication) {
 //            groupId = 'com.wgllss.music.plugin'
-            artifactId = 'test-ASM'
+            artifactId = 'plugin-ASM'
 //            version = '1.0.03'
 
             from components.java
@@ -70,22 +35,22 @@ publishing {
 //    打包成一个jar    引用jar  生成这个三个信息
     repositories {
         maven {
-//            url = "../repo"
-            //https://s01.oss.sonatype.org/content/groups/public/
-            //https://s01.oss.sonatype.org/content/groups/staging/
-            //https://s01.oss.sonatype.org/content/repositories/releases/
-            //https://s01.oss.sonatype.org/content/repositories/snapshots/
-//            url "https://s01.oss.sonatype.org/content/repositories/staging/"
-            name = 'release'
-            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                // 这里就是之前在issues.sonatype.org注册的账号
-                def properties = new Properties()
-                def inputSteam = project.rootProject.file('local.properties').newDataInputStream()
-                properties.load(inputSteam)
-                username = properties.getProperty('store_username')
-                password = properties.getProperty('store_password')
-            }
+            url = "../repo"
+//            //https://s01.oss.sonatype.org/content/groups/public/
+//            //https://s01.oss.sonatype.org/content/groups/staging/
+//            //https://s01.oss.sonatype.org/content/repositories/releases/
+//            //https://s01.oss.sonatype.org/content/repositories/snapshots/
+////            url "https://s01.oss.sonatype.org/content/repositories/staging/"
+//            name = 'release'
+//            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+//            credentials {
+//                // 这里就是之前在issues.sonatype.org注册的账号
+//                def properties = new Properties()
+//                def inputSteam = project.rootProject.file('local.properties').newDataInputStream()
+//                properties.load(inputSteam)
+//                username = properties.getProperty('store_username')
+//                password = properties.getProperty('store_password')
+//            }
         }
     }
 }
