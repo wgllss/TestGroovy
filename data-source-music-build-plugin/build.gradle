@@ -4,10 +4,10 @@ plugins {
 }
 //此处配置 group 和 version 可以 不用在 maven(MavenPublication) { 下面配置了,配置一个地方就好
 // 指定自定义 Gradle 插件的分组
-//group 'io.github.wgllss'
-group 'com.wgllss.music.plugin'
+group 'io.github.wgllss'
+//group 'com.wgllss.music.plugin'
 // 指定自定义 Gradle 插件的版本号
-version '1.0.12'
+version '1.0.13'
 
 dependencies {
     //gradle sdk
@@ -35,22 +35,22 @@ publishing {
 //    打包成一个jar    引用jar  生成这个三个信息
     repositories {
         maven {
-            url = "../repo"
+//            url = "../repo"
 //            //https://s01.oss.sonatype.org/content/groups/public/
 //            //https://s01.oss.sonatype.org/content/groups/staging/
 //            //https://s01.oss.sonatype.org/content/repositories/releases/
 //            //https://s01.oss.sonatype.org/content/repositories/snapshots/
 ////            url "https://s01.oss.sonatype.org/content/repositories/staging/"
 //            name = 'release'
-//            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-//            credentials {
-//                // 这里就是之前在issues.sonatype.org注册的账号
-//                def properties = new Properties()
-//                def inputSteam = project.rootProject.file('local.properties').newDataInputStream()
-//                properties.load(inputSteam)
-//                username = properties.getProperty('store_username')
-//                password = properties.getProperty('store_password')
-//            }
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                // 这里就是之前在issues.sonatype.org注册的账号
+                def properties = new Properties()
+                def inputSteam = project.rootProject.file('local.properties').newDataInputStream()
+                properties.load(inputSteam)
+                username = properties.getProperty('store_username')
+                password = properties.getProperty('store_password')
+            }
         }
     }
 }
