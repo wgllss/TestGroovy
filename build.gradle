@@ -4,14 +4,14 @@ buildscript {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        maven{
-            url uri('https://s01.oss.sonatype.org/service/local/repositories/iogithubwgllss-1000/content/')
-        }
+//        maven{
+//            url uri('https://s01.oss.sonatype.org/service/local/repositories/iogithubwgllss-1000/content/')
+//        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.1"
 //        classpath "com.gitee.wgllss888:TestGroovy:1.0.03"
-        classpath "io.github.wgllss:ASM:1.0.03"
+//        classpath "io.github.wgllss:ASM:1.0.03"
     }
 }
 

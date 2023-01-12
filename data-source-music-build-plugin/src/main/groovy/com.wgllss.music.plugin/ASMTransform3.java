@@ -27,7 +27,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,7 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 
-public class ASMTransform2 extends Transform {
+public class ASMTransform3 extends Transform {
     static File destJarFile;
     static File destClassFile;
 
@@ -77,14 +76,6 @@ public class ASMTransform2 extends Transform {
                         directoryInput.getScopes(),
                         Format.JAR
                 );
-//                System.out.println("---------jar--srcFile--------" + directoryInput.getFile());
-//                System.out.println("---------jar--dest path --------" + dest.getAbsolutePath());
-//                if (directoryInput.getFile().toString().equals("D:\\git_project\\wgllss-music-data-source\\Dynamic-Host-Library\\build\\intermediates\\runtime_library_classes_jar\\debug\\classes.jar")) {
-//                    System.out.println("--jar--srcFile--" + directoryInput.getFile() + "--dest--" + dest.getAbsolutePath());
-//                    //处理jar包
-//                    destJarFile = dest;
-////                    scanJar(directoryInput.getFile(), dest);
-//                }
                 scanJar(directoryInput.getFile(), dest);
                 FileUtils.copyFile(directoryInput.getFile(), dest);
             }
@@ -92,31 +83,18 @@ public class ASMTransform2 extends Transform {
 //            ------------------------------class------------------------------------
             for (DirectoryInput directoryInput : input.getDirectoryInputs()) {
                 String dirName = directoryInput.getName();
-
-//                System.out.println("---------dirName--srcFile--------" + dirName);
-
-//                System.out.println("src目录：" + directoryInput.getFile().getAbsolutePath());
                 File dest = outputProvider.getContentLocation(
                         dirName, directoryInput.getContentTypes(),
                         directoryInput.getScopes(),
                         Format.DIRECTORY
                 );
-
-//                String preFileName = directoryInput.getFile().getAbsolutePath();
-//                findTarget(directoryInput.getFile(), preFileName, dest);
                 FileUtils.copyDirectory(directoryInput.getFile(), dest);
             }
         }
 
         if (destJarFile != null) {
-            insertCodeToJar(destJarFile);
-//            createClassInToJar(destJarFile);
+            createClassInToJar(destJarFile);
         }
-//        if (destClassFile != null) {
-////            modifyClass(destClassFile);
-//            findClass(destClassFile, destClassFile.getAbsolutePath());
-////            insertCodeToClass(destClassFile);
-//        }
     }
 
 
@@ -126,36 +104,8 @@ public class ASMTransform2 extends Transform {
         while (enumeration.hasMoreElements()) {
             JarEntry jarEntry = enumeration.nextElement();
             String entryName = jarEntry.getName();
-            if (jarSrc.getAbsolutePath().contains("Dynamic-Host-Library-release-runtime.jar"))
-                System.out.println("------scanJar-------filePath1---------" + entryName);
             if (shouldTargetJarClass(entryName)) {
                 destJarFile = dest;
-            }
-        }
-    }
-
-    private void findTarget(File clazz, String fileName, File dest) {
-        if (clazz.isDirectory()) {
-            File[] files = clazz.listFiles();
-            for (File file : files) {
-                findTarget(file, fileName, dest);
-            }
-        } else {
-            String filePath = clazz.getAbsolutePath();
-            if (!filePath.endsWith(".class")) {
-                return;
-            }
-            if (filePath.contains("R$") || filePath.contains("R.class")
-                    || filePath.contains("BuildConfig.class")) {
-                return;
-            }
-            String path = filePath.replace(fileName, "");
-            path = path.replaceAll("\\\\", "/");
-            path = path.substring(1);
-            System.out.println("-------------filePath1---------" + path);
-            if (shouldMainActivityClass(path)) {
-                System.out.println("--fileName--" + fileName + "--filePath--" + path);
-                destClassFile = dest;
             }
         }
     }
@@ -165,30 +115,13 @@ public class ASMTransform2 extends Transform {
         return entryName != null && entryName.equals("com/wgllss/dynamic/host/library/SampleDownLoaderFace.class");
     }
 
-    private static boolean shouldProcessClass(String entryName) {
-        return entryName != null && entryName.equals("com/wgllss/music/lib/MusicDemo.class");
-    }
-
-    private static boolean shouldMainActivityClass(String entryName) {
-        return entryName != null && entryName.contains("com/wgllss/music/demo_dex/MainActivity.class");
-    }
-
     private static byte[] writeBytesToJar(InputStream inputStream) throws IOException {
-//        ClassReader cr = new ClassReader(inputStream);
-//        ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-
-
         ClassWriter cw = new ClassWriter(0);
         genClass(cw);
-
-
-//        ScanClassVisitor cv = new ScanClassVisitor(Opcodes.ASM7, cw);
-//        cr.accept(cv, ClassReader.EXPAND_FRAMES);
         return cw.toByteArray();
     }
 
     private static void genClass(ClassWriter classWriter) {
-//        FieldVisitor fieldVisitor;
         MethodVisitor methodVisitor;
         AnnotationVisitor annotationVisitor0;
         classWriter.visit(V1_8, ACC_PUBLIC | Opcodes.ACC_FINAL | ACC_SUPER, "com/wgllss/music/lib/MusicDemo", null, "java/lang/Object", null);
@@ -269,7 +202,6 @@ public class ASMTransform2 extends Transform {
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            System.out.println("name:" + name);
             if (name.equals("getDownUrl")) {
                 mv = new MyWMethodVisitor(Opcodes.ASM7, access, desc, mv);
             }
@@ -283,25 +215,6 @@ public class ASMTransform2 extends Transform {
             super(api, access, des, mv);
         }
 
-        int s;
-
-//        @Override
-//        public void visitInsn(int opcode) {
-//            System.out.println("----------visitInsn---------------");
-//            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
-//                mv.visitVarInsn(Opcodes.ALOAD, 0);
-//                mv.visitTypeInsn(Opcodes.CHECKCAST, "android/content/Context");
-//                mv.visitTypeInsn(Opcodes.NEW, "com/wgllss/music/lib/MusicDemo");
-//                mv.visitInsn(Opcodes.DUP);
-//                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "com/wgllss/music/lib/MusicDemo", "<init>", "()V", false);
-//                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/wgllss/music/lib/MusicDemo", "getDemoUrl", "()Ljava/lang/String;", false);
-//                mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/CharSequence");
-//                mv.visitInsn(Opcodes.ICONST_0);
-//                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/widget/Toast", "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;", false);
-//                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "android/widget/Toast", "show", "()V", false);
-//            }
-//            super.visitInsn(opcode);
-//        }
 
         @Override
         public void visitLineNumber(int line, Label start) {
@@ -315,22 +228,6 @@ public class ASMTransform2 extends Transform {
                 mv.visitInsn(Opcodes.ARETURN);
             }
         }
-
-//        @Override
-//        public void visitLineNumber(int line, Label start) {
-//            super.visitLineNumber(line, start);
-//            if (line == 21) {
-//                mv.visitLineNumber(line, start);
-//                mv.visitVarInsn(Opcodes.ALOAD, 0);
-//                mv.visitTypeInsn(Opcodes.CHECKCAST, "android/content/Context");
-//                mv.visitVarInsn(Opcodes.ALOAD, 1);
-//                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/wgllss/music/lib/MusicDemo", "getDemoUrl", "()Ljava/lang/String;", false);
-//                mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/CharSequence");
-//                mv.visitInsn(Opcodes.ICONST_1);
-//                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/widget/Toast", "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;", false);
-//                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "android/widget/Toast", "show", "()V", false);
-//            }
-//        }
     }
 
     private static void createClassInToJar(File jarFile) throws IOException {
@@ -339,65 +236,19 @@ public class ASMTransform2 extends Transform {
             optJar.delete();
         }
 
+
+        JarFile file = new JarFile(jarFile);
+        Enumeration<JarEntry> enumeration = file.entries();
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(optJar));
         ZipEntry zipEntry0 = new ZipEntry("com/wgllss/music/lib/MusicDemo.class");
-        JarOutputStream jarOutputStream0 = new JarOutputStream(new FileOutputStream(jarFile));
-        jarOutputStream0.putNextEntry(zipEntry0);
-        jarOutputStream0.close();
-
-        JarFile file = new JarFile(jarFile);
-        Enumeration<JarEntry> enumeration = file.entries();
-        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(optJar));
+        jarOutputStream.putNextEntry(zipEntry0);
+        jarOutputStream.write(writeBytesToJar(null));
         while (enumeration.hasMoreElements()) {
             JarEntry jarEntry = enumeration.nextElement();
             String entryName = jarEntry.getName();
             ZipEntry zipEntry = new ZipEntry(entryName);
             InputStream inputStream = file.getInputStream(jarEntry);
             jarOutputStream.putNextEntry(zipEntry);
-            System.out.println("--entryName-0-->" + entryName+"--hasMoreElements()--"+enumeration.hasMoreElements());
-            if (shouldProcessClass(entryName)) {
-                System.out.println("--------entryName-1------------------>" + entryName);
-                byte[] bytes = writeBytesToJar(inputStream);
-                jarOutputStream.write(bytes);
-            } else {
-                jarOutputStream.write(IOUtils.toByteArray(inputStream));
-            }
-            inputStream.close();
-            jarOutputStream.closeEntry();
-        }
-
-        jarOutputStream.close();
-        file.close();
-        if (jarFile.exists()) {
-            jarFile.delete();
-        }
-        optJar.renameTo(jarFile);
-        System.out.println("--------entryName----jarFile--------------->" + jarFile.getAbsolutePath());
-    }
-
-
-    /**
-     * 修改jar里面代码
-     *
-     * @param jarFile
-     * @throws IOException
-     */
-    public static void insertCodeToJar(File jarFile) throws IOException {
-        File optJar = new File(jarFile.getParent(), jarFile.getName() + ".opt1");
-        if (optJar.exists()) {
-            optJar.delete();
-        }
-        JarFile file = new JarFile(jarFile);
-        System.out.println("--insertCodeToJar--jarFile-0-->" + jarFile.getAbsolutePath());
-        Enumeration<JarEntry> enumeration = file.entries();
-        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(optJar));
-
-        while (enumeration.hasMoreElements()) {
-            JarEntry jarEntry = enumeration.nextElement();
-            String entryName = jarEntry.getName();
-            ZipEntry zipEntry = new ZipEntry(entryName);
-            InputStream inputStream = file.getInputStream(jarEntry);
-            jarOutputStream.putNextEntry(zipEntry);
-            System.out.println("--insertCodeToJar--entryName-0-->" + entryName);
             if (shouldTargetJarClass(entryName)) {
                 byte[] bytes = wirteBytesToJarClass(inputStream);
                 jarOutputStream.write(bytes);
@@ -414,56 +265,6 @@ public class ASMTransform2 extends Transform {
             jarFile.delete();
         }
         optJar.renameTo(jarFile);
-        System.out.println("--------entryName----jarFile--------------->" + jarFile.getAbsolutePath());
-    }
-
-    private void findClass(File clazzFile, String dirPath) {
-        if (clazzFile.isDirectory()) {
-            File[] files = clazzFile.listFiles();
-            for (File file : files) {
-                findClass(file, dirPath);
-            }
-        } else {
-            String filePath = clazzFile.getAbsolutePath();
-            String path = filePath.replace(dirPath, "");
-            path = path.replaceAll("\\\\", "/");
-            path = path.substring(1);
-            if (shouldMainActivityClass(path)) {
-                System.out.println("-------------findClass----path-----" + path);
-                insertCodeToClass(clazzFile);
-            }
-        }
-    }
-
-    private void insertCodeToClass(File destClassFile) {
-        try {
-            System.out.println("destClassFile path " + destClassFile.getAbsolutePath());
-            File optFile = new File(destClassFile.getParent(), destClassFile.getName() + ".opt");
-            System.out.println("optFile path " + optFile.getAbsolutePath());
-            if (optFile.exists()) {
-                optFile.delete();
-            }
-            InputStream inputStream = new FileInputStream(destClassFile.getAbsolutePath());
-            FileOutputStream fileOutputStream = new FileOutputStream(optFile);
-            fileOutputStream.write(writeBytesToClass(inputStream));
-            fileOutputStream.close();
-            inputStream.close();
-            if (destClassFile.exists()) {
-                destClassFile.delete();
-            }
-            optFile.renameTo(destClassFile);
-            System.out.println("------destClassFile-->" + destClassFile.getAbsolutePath());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static byte[] writeBytesToClass(InputStream inputStream) throws IOException {
-        ClassReader cr = new ClassReader(inputStream);
-        ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-        ScanClassVisitor cv = new ScanClassVisitor(Opcodes.ASM7, cw);
-        cr.accept(cv, ClassReader.EXPAND_FRAMES);
-        return cw.toByteArray();
     }
 
     private static byte[] wirteBytesToJarClass(InputStream inputStream) throws IOException {
@@ -471,7 +272,6 @@ public class ASMTransform2 extends Transform {
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
         ClassVisitor cv = new ScanClassVisitor(Opcodes.ASM5, cw);
         cr.accept(cv, ClassReader.EXPAND_FRAMES);
-        System.out.println("------------referHackWhenInit2-------------");
         return cw.toByteArray();
     }
 
